@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' qrc:; style-src 'self' 'unsafe-inline'; img-src 'self' file:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>MULTI-AI</title>
+    <link rel="stylesheet" href="vendor/code.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script defer src="vendor/marked.min.js"></script>
+    <script defer src="vendor/purify.min.js"></script>
+    <script defer src="vendor/highlight.min.js"></script>
+    <script defer src="ui.js"></script>
+    <script defer src="app.js"></script>
+    <script defer src="panels.js"></script>
+  </head>
+  <body>
+    <div id="shell" inert>
+      <aside id="sidebar">
+        <div class="brand">
+          <img src="../assets/icon.png" alt="" /><strong
+            >MULTI<span>AI</span></strong
+          ><button
+            class="icon collapse"
+            title="Collapse sidebar (Ctrl+B)"
+            aria-label="Collapse sidebar"
+            data-icon="panel"
+          ></button>
+        </div>
+        <button class="new" id="new" title="New chat (Ctrl+N)">
+          <i data-icon="plus"></i><span>New chat</span><kbd>Ctrl N</kbd>
+        </button>
+        <div class="side-label">THIS SESSION</div>
+        <nav id="history" aria-label="Temporary conversations"></nav>
+        <div class="side-bottom">
+          <button data-page="models" title="Model Manager">
+            <i data-icon="layers"></i><span>Model Manager</span>
+          </button>
+          <button data-page="connections" title="API Connections">
+            <i data-icon="plug"></i><span>API Connections</span>
+          </button>
+          <button data-page="settings" title="Settings">
+            <i data-icon="settings"></i><span>Settings</span>
+          </button>
+          <div class="credit">
+            <span class="signature">Y</span>
+            <div><b>MADE BY YUG</b><small>MULTI-AI v1.0.0</small></div>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <button
+            class="icon expand"
+            aria-label="Expand sidebar"
+            title="Expand sidebar (Ctrl+B)"
+            data-icon="panel"
+          ></button>
+          <div class="crumb">
+            <i data-icon="grid"></i><span>Workspace</span><em>/</em
+            ><b id="pageName">Chat</b>
+          </div>
+          <div class="toolbar-end">
+            <span
+              id="sessionLabel"
+              title="Chats are cleared when the app closes"
+              ><i data-icon="clock"></i> Temporary</span
+            >
+            <button id="pick" aria-haspopup="dialog">
+              <i data-icon="layers"></i><span>Select model</span
+              ><i data-icon="chevron"></i>
+            </button>
+          </div>
+        </header>
+        <section id="chat">
+          <div id="scroll">
+            <div id="welcome">
+              <div class="orbit" aria-hidden="true">
+                <div class="orbital-ring r1"></div>
+                <div class="orbital-ring r2"></div>
+                <div class="orbital-ring r3"></div>
+                <div class="space-dots"></div>
+                <div class="core"><img src="../assets/icon.png" alt="" /></div>
+              </div>
+              <h1>Where do we begin?</h1>
+              <p>Choose a model and start a conversation.</p>
+              <div class="quick">
+                <button id="cloudQuick">
+                  <i class="tile-icon" data-icon="plug"></i
+                  ><strong>Connect a provider</strong
+                  ><small>Manage cloud API keys</small
+                  ><i class="corner" data-icon="arrow"></i>
+                </button>
+                <button id="localQuick">
+                  <i class="tile-icon blue" data-icon="cpu"></i
+                  ><strong>Use a local model</strong
+                  ><small>LM Studio or Ollama</small
+                  ><i class="corner" data-icon="arrow"></i>
+                </button>
+              </div>
+            </div>
+            <div id="messages"></div>
+          </div>
+          <div class="dock">
+            <button
+              id="jump"
+              class="icon"
+              hidden
+              title="Scroll to bottom"
+              aria-label="Scroll to bottom"
+              data-icon="down"
+            ></button>
+            <div id="composer">
+              <div id="editbar" hidden>
+                <span></span><button id="cancelEdit">Cancel</button>
+              </div>
+              <textarea
+                id="prompt"
+                rows="1"
+                aria-label="Message"
+                placeholder="Message MULTI-AI…"
+              ></textarea>
+              <div class="composer-bottom">
+                <button id="composerModel">
+                  <i data-icon="layers"></i><span>Select model</span
+                  ><i data-icon="chevron"></i></button
+                ><button
+                  id="send"
+                  title="Send message"
+                  aria-label="Send message"
+                  disabled
+                  data-icon="up"
+                ></button>
+              </div>
+            </div>
+            <div class="footnote">
+              <span
+                ><i data-icon="clock"></i> Chats clear when you close
+                MULTI-AI</span
+              ><span>Enter to send</span>
+            </div>
+          </div>
+        </section>
+        <section id="panel" hidden></section>
+      </main>
+    </div>
+    <dialog id="selector">
+      <div class="dialog-head">
+        <div><h2>Select a model</h2></div>
+        <button
+          class="icon"
+          id="closePick"
+          aria-label="Close model selector"
+          data-icon="x"
+        ></button>
+      </div>
+      <input
+        id="searchModels"
+        type="search"
+        placeholder="Find a model or provider…"
+        aria-label="Find a model or provider"
+      />
+      <div id="choices"></div>
+      <button id="custom" class="outline wide">
+        <i data-icon="plus"></i>Add custom model
+      </button>
+    </dialog>
+    <div id="toast" role="status" hidden></div>
+  </body>
+</html>

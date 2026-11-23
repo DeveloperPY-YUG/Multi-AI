@@ -1,0 +1,44 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v1.0.0']
+
+permissions:
+  contents: write
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - name: Get source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: 'x64'
+      - name: Build portable Windows EXE and ZIP
+        shell: pwsh
+        run: ./build-windows.ps1
+      - name: Verify executable and frontend assets
+        shell: pwsh
+        run: |
+          if (!(Test-Path dist/MULTI-AI/Multi-AI.exe)) { throw 'Missing EXE' }
+          if (!(Test-Path dist/MULTI-AI/_internal/frontend/index.html)) { throw 'Missing UI' }
+          if (!(Test-Path release/MULTI-AI-v1.0.0-Windows.zip)) { throw 'Missing ZIP' }
+          Write-Host 'Portable build structure verified.'
+      - name: Save Windows ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MULTI-AI-v1.0.0-Windows
+          path: release/MULTI-AI-v1.0.0-Windows.zip
+          if-no-files-found: error
+      - name: Publish GitHub Release when v1.0.0 is tagged
+        if: startsWith(github.ref, 'refs/tags/v1.0.0')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.0" "release/MULTI-AI-v1.0.0-Windows.zip" --title "MULTI-AI v1.0.0" --notes "Official Windows portable build. MADE BY YUG." --verify-tag
