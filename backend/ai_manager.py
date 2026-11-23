@@ -4,6 +4,7 @@ import asyncio
 import threading
 
 import httpx
+import httpcore  # Load the HTTP transport before the desktop window starts.
 
 from . import providers
 from .config import LOCAL, PRESETS
@@ -89,7 +90,6 @@ class Engine:
                 timeout=cfg["timeout"],
                 trust_env=False,
                 follow_redirects=False,
-                verify=not local,
             ) as client:
                 if mid is None:
                     rows = await providers.discover(client, p, base, auth, protocol)
