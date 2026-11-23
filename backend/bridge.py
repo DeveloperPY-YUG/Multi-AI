@@ -21,18 +21,16 @@ from .model_manager import Models
 
 
 class Delivery(QObject):
-    # Qt's queued QString delivery is reliable across the network worker and
-    # GUI threads, including on Windows runners without a nested event loop.
-    arrived = Signal(str)
+    arrived = Signal(object)
 
     def __init__(self, receive, parent):
         super().__init__(parent)
         self.receive = receive
         self.arrived.connect(self.deliver, Qt.ConnectionType.QueuedConnection)
 
-    @Slot(str)
+    @Slot(object)
     def deliver(self, message):
-        self.receive(json.loads(message))
+        self.receive(message)
 
 
 class Bridge(QObject):
@@ -48,9 +46,7 @@ class Bridge(QObject):
         self.keys = {}
         self.closed = False
         self.delivery = Delivery(self._receive, self)
-        self.engine = Engine(
-            vault, lambda message: self.delivery.arrived.emit(json.dumps(message)), transport
-        )
+        self.engine = Engine(vault, self.delivery.arrived.emit, transport)
         for p, profile in self.config.registry.items():
             if not profile["local"]:
                 self._key_status(p)
