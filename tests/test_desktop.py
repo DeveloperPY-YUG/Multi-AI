@@ -165,8 +165,15 @@ class DesktopTest(unittest.TestCase):
         diag = self.js(
             "JSON.stringify([document.readyState,location.href,typeof desktop,typeof S==='object'?S.status:null])"
         )
+        bridge = self.w.bridge
+        backend = {
+            "status": bridge.status,
+            "probes": bridge.probes,
+            "worker_alive": bridge.engine.worker.is_alive(),
+            "tasks": list(bridge.engine.tasks),
+        }
         self.fail(
-            f"Timed out: {condition}. Page: {diag}. Console errors: {self.errors}"
+            f"Timed out: {condition}. Page: {diag}. Backend: {backend}. Console errors: {self.errors}"
         )
 
     def send(self, text):
