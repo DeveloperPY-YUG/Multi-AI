@@ -6,6 +6,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -171,6 +172,14 @@ class DesktopTest(unittest.TestCase):
             "probes": bridge.probes,
             "worker_alive": bridge.engine.worker.is_alive(),
             "tasks": list(bridge.engine.tasks),
+            "worker_stack": traceback.format_stack(
+                sys._current_frames()[bridge.engine.worker.ident]
+            ) if bridge.engine.worker.ident in sys._current_frames() else [],
+            "task_stacks": {
+                token: [f"{frame.f_code.co_filename}:{frame.f_lineno}:{frame.f_code.co_name}"
+                        for frame in task.get_stack()]
+                for token, task in bridge.engine.tasks.items()
+            },
         }
         self.fail(
             f"Timed out: {condition}. Page: {diag}. Backend: {backend}. Console errors: {self.errors}"
