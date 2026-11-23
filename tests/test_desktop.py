@@ -9,6 +9,7 @@ import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 
 if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -19,7 +20,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWidgets import QApplication, QCheckBox, QDialog, QLineEdit, QMessageBox
 
-from backend.config import Config
+from backend.config import Config, model_entry
 from backend.key_manager import Vault
 from main import AppPage, Window
 from tests.test_providers import MemoryCredentials
@@ -113,6 +114,19 @@ class DesktopTest(unittest.TestCase):
         )
         self.vault = Vault(MemoryCredentials())
         self.errors = []
+
+        # This UI test checks the WebChannel and settings flow. Model discovery
+        # and HTTP parsing are covered by the provider tests; using live socket
+        # discovery here can leave the startup probes pending on CI runners.
+        if self._testMethodName == "test_connections_settings_and_models":
+            async def fixture_discover(client, provider, base, auth, protocol=None):
+                names = {"lmstudio": "fixture-lm", "ollama": "fixture-ollama"}
+                return ([model_entry(provider, names[provider], "", {provider: True})]
+                        if provider in names else [])
+
+            mocked = patch("backend.providers.discover", fixture_discover)
+            mocked.start()
+            self.addCleanup(mocked.stop)
 
         def console(page, level, message, line, source):
             if level == QWebEnginePage.JavaScriptConsoleMessageLevel.ErrorMessageLevel:
